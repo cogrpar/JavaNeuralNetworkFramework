@@ -1,8 +1,8 @@
-package francisco;
+package ann;
 
 import java.util.Random;
 
-public class Francisco {
+public class ann {
     
         public static int height = 10;
         public static int layers = 10;
