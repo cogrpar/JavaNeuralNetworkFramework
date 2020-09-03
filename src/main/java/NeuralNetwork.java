@@ -125,6 +125,11 @@ public class NeuralNetwork {
         }
         
         public static double[] run_net (double[] inputs){
+            int [] array = {1, 3, 5, 7, 9, 11};
+            Tensor t = Tensor.create(array);
+
+            System.out.println(t);
+            t.close();
             
             double outputs[] = new double[height];
             double layer[][] = new double[height][layers];
