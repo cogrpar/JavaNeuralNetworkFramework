@@ -1,5 +1,7 @@
 import java.util.Random;
 import org.tensorflow.*;
+import org.tensorflow.op.Ops;
+import org.tensorflow.op.linalg.MatMul;
 
 public class NeuralNetwork {
 
@@ -10,6 +12,26 @@ public class NeuralNetwork {
         public static double[] biases; // the array that will store the biases
 
         public static void main(String[] args) {
+
+            double[][] matrix1 = { {1, 2, 2},
+                    {2, 1, 3},
+                    {2, 3, 1} };
+
+            double[][] matrix2 = { {1, 3, 3},
+                    {3, 1, 2},
+                    {3, 2, 1} };
+
+            double product[][] = matrix_multiply(matrix1, matrix2);
+
+            // print out the matrix
+            for (int i = 0; i < 3; i ++){
+                for (int j = 0; j < 3; j++){
+                    System.out.print(product[i][j] + " ");
+                }
+                System.out.print("\n");
+            }
+
+            /*
             
             weights = new double[height*height*layers+3]; // there are height^2 weights for each layer, so the total number of weights is (height^2)*layers
             biases = new double[height*layers]; // there is one bias for each neuron, so this array has height*layers elements, as it is the number of neurons
@@ -31,6 +53,7 @@ public class NeuralNetwork {
             .
             .
             */
+            /*
             inputs[height-1] = 1;
             
             train(inputs, inputs, true, 0.01);
@@ -42,6 +65,7 @@ public class NeuralNetwork {
             for (int t = 0; t<height; t++){
                 System.out.println(outputs[t]);
             }
+            */
         }
       
         public static void setup(){ // this method is used to initialize the weights and biases for the network to a random number between 1 and 0
@@ -123,13 +147,45 @@ public class NeuralNetwork {
             }
            
         }
+
+        public static double[][] matrix_multiply (double[][] input1, double[][] input2) { // this method multiples two input matrices and returns the resulting matrix
+            // start by figuring out the dimensions of the resulting array
+            int[] dimensions = new int[2];
+            int l1 = input1.length;
+            int w1 = input1[0].length;
+            int l2 = input2.length;
+            int w2 = input2[0].length;
+
+            if (l1 == w2){ // if both the matrices share a common element count in this configuration
+                dimensions[0] = l2;
+                dimensions[1] = w1;
+            }
+            else if (l2 == w1){ // else if both matrices share a common element count in this configuration
+                dimensions[0] = l1;
+                dimensions[1] = w2;
+            }
+            else { // else if these matrices can not be multiplied because they share no common element count
+                throw new ArithmeticException(); // throw an exception
+            }
+
+            // declare a new Tensorflow Graph that will be used to carry out the operation
+            Graph graph = new Graph();
+
+            // create a new operation to multiply the matrices
+            Ops tf = Ops.create(graph);
+            Session session = new Session(graph);
+
+            // declare the output matrix
+            double[][] product = new double[dimensions[0]][dimensions[1]];
+
+            // cary out the multiplication
+            tf.withName("mult").linalg.matMul(tf.withName("A").constant(input1), tf.withName("B").constant(input2));
+            product = session.runner().fetch("mult").run().get(0).copyTo(product);
+
+            return product;
+        }
         
         public static double[] run_net (double[] inputs){
-            int [] array = {1, 3, 5, 7, 9, 11};
-            Tensor t = Tensor.create(array);
-
-            System.out.println(t);
-            t.close();
             
             double outputs[] = new double[height];
             double layer[][] = new double[height][layers];
