@@ -2,14 +2,15 @@ import java.util.Random;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.linalg.MatMul;
+import java.lang.Math;
 
 public class NeuralNetwork {
 
         public static int height = 10; // height of each hidden layer
         public static int layers = 10; //number of hidden layers
         public static final double e =  2.7182818284590452; //constant e
-        public static double[] weights; // the array that will store the weights
-        public static double[] biases; // the array that will store the biases
+        public static double[][] weights; // the array that will store the weights
+        public static double[][] biases; // the array that will store the biases
 
         public static void main(String[] args) {
 
@@ -69,16 +70,24 @@ public class NeuralNetwork {
         }
       
         public static void setup(){ // this method is used to initialize the weights and biases for the network to a random number between 1 and 0
+            weights = new double[layers][height*height];
+            biases = new double[layers][height];
+
             // init the weights
             for (int i = 0; i < weights.length; i++){
-                weights[i] = random_number();
+                for (int j = 0; j < weights[0].length; j++) {
+                    weights[i][j] = random_number();
+                }
             }
             // init the bias
             for (int i = 0; i < biases.length; i++){
-                biases[i] = random_number();
+                for (int j = 0; j < biases[0].length; j++) {
+                    biases[i][j] = random_number();
+                }
             }
         }
-        
+
+        /*
         public static void train(double[] input, double[] training, boolean print, double precision){
             
             for (int i = height*height*layers; i > 0; i = i-1){
@@ -146,7 +155,7 @@ public class NeuralNetwork {
                 }
             }
            
-        }
+        }*/
 
         public static double[][] matrix_multiply (double[][] input1, double[][] input2) { // this method multiples two input matrices and returns the resulting matrix
             // start by figuring out the dimensions of the resulting array
@@ -184,98 +193,45 @@ public class NeuralNetwork {
 
             return product;
         }
-        
-        public static double[] run_net (double[] inputs){
-            
-            double outputs[] = new double[height];
-            double layer[][] = new double[height][layers];
-            
-            int trac1 = 0;
-          
-            
-            //this method runs the network
-            for (int i = 0; i < layers; i++){
-                //for each layer, calc each neuron:
-                for (int j = 0; j < height; j++){
-                    //if it is the first time...
-                    if (i == 0){
-                        double output = 0;
-            
-                        for (int n = 0; n < height; n++){
-                            output = output + weights[trac1]*inputs[n];
-				
-				trac1++;
-                        }
-                        
-                        output = Math.pow(e, output) / (Math.pow(e, output) + 1); //sigmoid func
 
-                        
-                        layer[j][i] = output;
-                        if (Double.isNaN(layer[j][i])){
-                            layer[j][i] = 1E-3;
-                        }
-                    }
-                    
-                    //else if it is the last time...
-                    else if (i == layers-1){
-                        double output = 0;
-            
-                        for (int n = 0; n < height; n++){
-                            output = output + weights[trac1]*layer[n][i-1];
-				
-				trac1++;
-                        }
-
-                        output = Math.pow(e, output) / (Math.pow(e, output) + 1); //sigmoid func
-
-                        
-                        layer[j][i] = output;
-                        if (Double.isNaN(layer[j][i])){
-                            layer[j][i] = 1E-3;
-                        }
-                        outputs[j] = layer[j][i];
-                        
-                        
-                    }
-                    
-                    //else...
-                    else {
-                        double output = 0;
-            
-                        for (int n = 0; n < height; n++){
-                            output = output + weights[trac1]*layer[n][i-1];
-				trac1++;
-				
-                        }
-
-                        output = Math.pow(e, output) / (Math.pow(e, output) + 1); //sigmoid func
-
-                        
-                        layer[j][i] = output;
-                        if (Double.isNaN(layer[j][i])){
-                            layer[j][i] = 1E-3;
-                        }
-                    }
-                    
-                    //System.out.println(layer[j][i]);
-                    
-                }
-                
-            }
-            
-            return outputs;
+        public static double sigmoid (double input){ // this method plugs the input into the sigmoid function and returns the output of that function
+            return Math.pow(e, input) / (Math.pow(e, input) + 1);
         }
-    
-        //fuction to genetrate random decimals
-        public static double random_number(){
-		Random rand = new Random();
+        
+        public static double[] run_net (double[] inputs){ // this method runs the network and returns the output of the network
 
-		// Obtain a number between [0 - 199].
-		double n = rand.nextInt(199);
-		
-		n = n/100;
-		n = n - 1;
-		return n;
+            double layer[] = new double[height]; // define an array that will store the layer values
+            double z[][] = new double[1][height]; // define an array that will store the weighted sum of the previous layer and the bias
+            layer = inputs;
+
+            double[][] matrix_layer = new double[height][1]; // declare a new matrix that will be used to pass the layer data into the matrix_multiply method
+
+            for (int i = 0; i < layers; i++){ // loop over all of the layers
+
+                for (int j = 0; j < height; j++){ // convert the layer data array into a matrix
+                    matrix_layer[j][0] = layer[j];
+                }
+
+                z = matrix_multiply(matrix_layer, weights); // get the z value (weighted sum of all of the previous outputs)
+
+                for (int j = 0; j < height; j++){
+                    layer[j] = sigmoid(z[0][j] + biases[i][j]); //add the bias to the weighted sum and pump the result into the sigmoid function
+                }
+                //System.out.println(layer[j][i]);
+            }
+
+            return layer;
+        }
+
+        public static double random_number(){ //function to generate random decimals
+            Random rand = new Random();
+
+            // Obtain a number between [0 - 199].
+            double n = rand.nextInt(199);
+
+            n = n/100;
+            n = n - 1;
+            return n;
         }
     
 }
