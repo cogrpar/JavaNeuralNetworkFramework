@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
@@ -14,22 +15,20 @@ public class NeuralNetwork {
 
         public static void main(String[] args) {
 
-            double[][] matrix1 = { {1, 2, 2},
-                    {2, 1, 3},
-                    {2, 3, 1} };
+            setup();
 
-            double[][] matrix2 = { {1, 3, 3},
-                    {3, 1, 2},
-                    {3, 2, 1} };
+            double[] input = new double[height];
+            for (int i = 0; i < height; i++){
+                input[i] = random_number();
 
-            double product[][] = matrix_multiply(matrix1, matrix2);
-
-            // print out the matrix
-            for (int i = 0; i < 3; i ++){
-                for (int j = 0; j < 3; j++){
-                    System.out.print(product[i][j] + " ");
+                if (input[i] < 0){
+                    input[i] = 0;
                 }
-                System.out.print("\n");
+            }
+
+            double [] run = run_net(input);
+            for (int i = 0; i < height; i++){
+                System.out.println(run[i]);
             }
 
             /*
@@ -158,12 +157,14 @@ public class NeuralNetwork {
         }*/
 
         public static double[][] matrix_multiply (double[][] input1, double[][] input2) { // this method multiples two input matrices and returns the resulting matrix
+            System.out.println(Arrays.toString(input2));
+
             // start by figuring out the dimensions of the resulting array
             int[] dimensions = new int[2];
-            int l1 = input1.length;
             int w1 = input1[0].length;
-            int l2 = input2.length;
             int w2 = input2[0].length;
+            int l1 = input1.length;
+            int l2 = input2.length;
 
             if (l1 == w2){ // if both the matrices share a common element count in this configuration
                 dimensions[0] = l2;
@@ -204,12 +205,12 @@ public class NeuralNetwork {
             double z[][] = new double[1][height]; // define an array that will store the weighted sum of the previous layer and the bias
             layer = inputs;
 
-            double[][] matrix_layer = new double[height][1]; // declare a new matrix that will be used to pass the layer data into the matrix_multiply method
+            double[][] matrix_layer = new double[1][height]; // declare a new matrix that will be used to pass the layer data into the matrix_multiply method
 
             for (int i = 0; i < layers; i++){ // loop over all of the layers
 
                 for (int j = 0; j < height; j++){ // convert the layer data array into a matrix
-                    matrix_layer[j][0] = layer[j];
+                    matrix_layer[0][j] = layer[j];
                 }
 
                 z = matrix_multiply(matrix_layer, weights); // get the z value (weighted sum of all of the previous outputs)
