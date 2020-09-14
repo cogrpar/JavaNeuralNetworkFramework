@@ -86,21 +86,29 @@ elif (load == 'n'): # if they answer no
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-    plt.show()
+    # plt.show()
 
     autoencoder.save('autoencoder_model_saves/autoencoder.h5')
     encoder.save('autoencoder_model_saves/encoder.h5')
     decoder.save('autoencoder_model_saves/decoder.h5')
 
     # add the encoded dataset to a yaml file
-    encoded = [[], []]
-    for i in range(len(encoded_imgs)):
-        encoded[0].append(labels[i]) # add the label data
-        encoded[1].append(encoded_imgs[i].tolist()) # add the image data
+    dataStr = "["
+    labelsStr = "["
+    encoded_imgs = encoded_imgs.tolist()
+    labels = labels.tolist()
+    for i in range(len(encoded_imgs)): # start by converting the arrays into strings
+        dataStr += str(encoded_imgs[i]) + ","
+        labelsStr += str(labels[i]) + ", "
+    dataStr = dataStr[:-1:] + "]"
+    labelsStr = labelsStr[:-1] + "]"
 
-    # now that we have the dataset encoded in an array, add that array to the yaml file
-    dataset = 'data: '+ str(encoded)
-    file = open(r'src/main/java/dataset.yaml', 'w')
+    dataStr = "data: " + dataStr
+    labelsStr = "labels: " + labelsStr
+
+    # now that we have converted the data/labels into strings, write those strings to the yaml file
+    dataset = dataStr + "\n" + labelsStr
+    file = open(r'src/main/java/resources/dataset.yaml', 'w')
     file.write(dataset) # write to the file
     file.close()
 

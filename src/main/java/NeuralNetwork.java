@@ -1,8 +1,11 @@
-import java.util.Arrays;
-import java.util.Random;
+import java.io.*;
+import java.nio.DoubleBuffer;
+import java.util.*;
+
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.linalg.MatMul;
+import org.yaml.snakeyaml.Yaml;
 import java.lang.Math;
 
 public class NeuralNetwork {
@@ -16,7 +19,8 @@ public class NeuralNetwork {
         public final static int batch_size = 10;
 
         public static void main(String[] args) {
-
+            train(false);
+/*
             setup();
 
             double[] input = new double[height];
@@ -49,11 +53,14 @@ public class NeuralNetwork {
                 for (int j = 0; j < biases[0].length; j++) {
                     biases[i][j] = random_number();
                 }
-            }
+            }*/
         }
 
-        public static void train(boolean print){
+        public static void train(boolean print) {
 
+            Dataset data = new Dataset();
+            data.init();
+            System.out.println(data.data);
         }
 
         public static double[][] matrix_multiply (double[][] input1, double[][] input2) { // this method multiples two input matrices and returns the resulting matrix
@@ -134,5 +141,42 @@ public class NeuralNetwork {
             n = n - 1;
             return n;
         }
-    
+
+}
+
+class Dataset{ // this is the class that the dataset in the yaml file gets mapped to
+
+    public void init() { // when init is run, fetch the data and labels from the yaml file
+        File test = new File(".\\src\\main\\java\\resources\\dataset.yaml"); // specify the file
+        System.out.println("Can Access YAML File: " + test.canRead());
+        System.out.println("Fetching Training Data...");
+
+        try{
+            Yaml yaml = new Yaml(); // yaml parser object
+            BufferedReader br = new BufferedReader(new FileReader(".\\src\\main\\java\\resources\\dataset.yaml")); // buffer reader to actually read the file
+            Map<String, Object> obj = yaml.load(br); // write the yaml entries to a hashmap
+            System.out.println("Done!");
+
+            // now write the fetched entries in the hashmap to the array attributes stored in this class
+            List<Double> labelsList = (List<Double>) obj.get("labels");
+            List<List<Double>> dataList = (List<List<Double>>)obj.get("data");
+
+            // now loop over the List and add the data to the corresponding arrays
+            for (int i = 0; i < labelsList.size(); i++){
+                // add the label at this index to the array
+                labels[i] = (double)labelsList.get(i);
+
+                // next add the data at this index, which will require another for loop as it is two dimensional
+                for (int j = 0; j < dataList.get(i).size(); j++){
+                    data[i][j] = (double)dataList.get(i).get(j);
+                }
+            }
+
+        }catch(Exception e){System.out.println("error reading dataset: " + e);}
+
+    }
+
+    double[] labels;
+    double[][] data;
+
 }
