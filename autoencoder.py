@@ -96,10 +96,25 @@ elif (load == 'n'): # if they answer no
     dataStr = "["
     labelsStr = "["
     encoded_imgs = encoded_imgs.tolist()
-    labels = labels.tolist()
+    # convert the label data into a multi-dimensional list
+    try:
+        labels.shape[1]
+        print("Labels are already multi-dimensional")
+    except:
+        labels = labels.tolist()
+        # if an exception was thrown above, it means that the labels list is one dimensional, so we need to fix that
+        for i in range(len(labels)):
+            elementList = []
+            for j in range(encoding_dim):
+                if (j == labels[i]): # if the label value is equal to this index, make the value of the list at this index 1, and 0 otherwise
+                    elementList.append(1.0)
+                else:
+                    elementList.append(0.0)
+            labels[i] = elementList # set this element of the labels list to the element array
+
     for i in range(len(encoded_imgs)): # start by converting the arrays into strings
         dataStr += str(encoded_imgs[i]) + ","
-        labelsStr += str(labels[i]) + ", "
+        labelsStr += str(labels[i]) + ","
     dataStr = dataStr[:-1:] + "]"
     labelsStr = labelsStr[:-1] + "]"
 

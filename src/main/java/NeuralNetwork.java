@@ -60,7 +60,7 @@ public class NeuralNetwork {
 
             Dataset data = new Dataset();
             data.init();
-            System.out.println(data.data);
+
         }
 
         public static double[][] matrix_multiply (double[][] input1, double[][] input2) { // this method multiples two input matrices and returns the resulting matrix
@@ -158,17 +158,22 @@ class Dataset{ // this is the class that the dataset in the yaml file gets mappe
             System.out.println("Done!");
 
             // now write the fetched entries in the hashmap to the array attributes stored in this class
-            List<Double> labelsList = (List<Double>) obj.get("labels");
+            List<List<Double>> labelsList = (List<List<Double>>) obj.get("labels");
             List<List<Double>> dataList = (List<List<Double>>)obj.get("data");
+
+            labels = new double[labelsList.size()][labelsList.get(0).size()];
+            data = new double[dataList.size()][dataList.get(0).size()];
 
             // now loop over the List and add the data to the corresponding arrays
             for (int i = 0; i < labelsList.size(); i++){
-                // add the label at this index to the array
-                labels[i] = (double)labelsList.get(i);
+                // add the label at this index to the array, which will require another for loop as it is two dimensional
+                for (int j = 0; j < labelsList.get(i).size(); j++){
+                    labels[i][j] = Double.valueOf(labelsList.get(i).get(j)).doubleValue();
+                }
 
                 // next add the data at this index, which will require another for loop as it is two dimensional
                 for (int j = 0; j < dataList.get(i).size(); j++){
-                    data[i][j] = (double)dataList.get(i).get(j);
+                    data[i][j] = Double.valueOf(dataList.get(i).get(j)).doubleValue();
                 }
             }
 
@@ -176,7 +181,7 @@ class Dataset{ // this is the class that the dataset in the yaml file gets mappe
 
     }
 
-    double[] labels;
+    double[][] labels;
     double[][] data;
 
 }
