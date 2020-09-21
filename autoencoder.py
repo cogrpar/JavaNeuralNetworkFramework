@@ -57,7 +57,7 @@ elif (load == 'n'): # if they answer no
     print (x_test.shape)
 
     autoencoder.fit(x_train, x_train,
-                    epochs=1,
+                    epochs=100,
                     batch_size=300,
                     shuffle=True,
                     validation_data=(x_test, x_test))
@@ -86,7 +86,7 @@ elif (load == 'n'): # if they answer no
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-    # plt.show()
+    plt.show()
 
     autoencoder.save('autoencoder_model_saves/autoencoder.h5')
     encoder.save('autoencoder_model_saves/encoder.h5')
