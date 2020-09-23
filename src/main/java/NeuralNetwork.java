@@ -8,20 +8,44 @@ import java.lang.Math;
 
 public class NeuralNetwork {
 
-        public final static int height = 10; // height of each hidden layer
-        public final static int layers = 4; //number of hidden layers
+        public final static int height = 32; // height of each hidden layer
+        public final static int layers = 2; //number of hidden layers
         public final static double e =  2.7182818284590452; //constant e
         public static double[][] weights; // the array that will store the weights
         public static double[][] matrixWeights = new double[height][height]; // array to store the weights as a matrix
         public static double[][] biases; // the array that will store the biases
-        public final static double learning_rate = 0.1;
-        public final static int batch_size = 20; // batch size that the network will train on
-        public final static int epochs = 200; // number of epochs that the network will train for
+        public final static double learning_rate = 0.01;
+        public final static int batch_size = 30; // batch size that the network will train on
+        public final static int epochs = 80; // number of epochs that the network will train for
 
         public static void main(String[] args) {
             setup(); // randomly initialize the weights and biases
 
+            EncodeTrainingData generate_data = new EncodeTrainingData("True", "y", "True"); // use the EncodeTrainingData class to generate the compressed training data using the autoencoder python script
+            generate_data.run();
+
             train(true); // run the network while printing out the progress
+
+            // once the network is trained, wait for the script to add an example to the yaml file, and predict that example
+            EncodeTrainingData generate_example = new EncodeTrainingData("True", "y", "False"); // use the EncodeTrainingData class to generate the example for the Network to try out
+            generate_example.run();
+
+            Dataset example = new Dataset(); // get the example data
+            example.init();
+
+            double[] output_activations = run_net(example.data[0])[layers-1]; // now run the network to see what it predicts
+
+            // now that we have the output of the network, find out which output was predicted
+            int highest_output_index = 0;
+            for (int i = 0; i < 10; i++){
+                if (output_activations[i] > output_activations[highest_output_index]){
+                    highest_output_index = i;
+                }
+                System.out.println(output_activations[i]);
+            }
+
+            // now that we know the index (which is also the output) we can print that to the user
+            System.out.println("\n\n\nThe model predicted that the example input was a " + highest_output_index);
 
         }
       
@@ -194,7 +218,7 @@ public class NeuralNetwork {
         private static double sigmoid (double input){ // this method plugs the input into the sigmoid function and returns the output of that function
             return Math.pow(e, input) / (Math.pow(e, input) + 1);
         }
-        
+
         public static double[][] run_net (double[] inputs){ // this method runs the network and returns the output of the network
 
             double layer[] = new double[height]; // define an array that will store the layer values
@@ -222,7 +246,6 @@ public class NeuralNetwork {
                 for (int j = 0; j < height; j++){
                     layer[j] = sigmoid(z[0][j] + biases[i][j]); //add the bias to the weighted sum and pump the result into the sigmoid function
                 }
-                //System.out.println(layer[j][i]);
                 layerArray[i] = layer;
 
             }
@@ -395,4 +418,33 @@ class Backpropagation{ // this class has all of the tools for carrying out the c
         }
     }
 
+}
+
+class EncodeTrainingData{ // this class runs the python script that implements a tensorflow autoencoder to compress the training data to the correct dimensions to be fed into the java neural network
+        String user_input;
+        String load;
+        String generate_training_data;
+
+        public EncodeTrainingData (String user_input, String load, String generate_training_data){ // constructor
+            this.user_input = user_input;
+            this.load = load;
+            this.generate_training_data = generate_training_data;
+        }
+
+        public void run (){
+        // execute the python script
+        System.out.print("compressing input...\n");
+        try {
+            Process process = Runtime.getRuntime().exec("python autoencoder.py " + load + " " + user_input + " " + generate_training_data);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            //int wait = process.waitFor();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

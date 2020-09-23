@@ -1,3 +1,4 @@
-Dataset.class
 NeuralNetwork.class
 Backpropagation.class
+Dataset.class
+EncodeTrainingData.class

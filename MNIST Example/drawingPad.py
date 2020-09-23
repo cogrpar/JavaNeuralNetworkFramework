@@ -42,13 +42,13 @@ class DrawingPad(object):
         y = self.root.winfo_rooty()
         x1 = x + 280
         y1 = y + 280
-        ImageGrab.grab().crop((x, y, x1, y1)).save("./user_drawn_image.png")
+        ImageGrab.grab().crop((x, y, x1, y1)).save("./MNIST Example/user_drawn_image.png")
         # now that the image has been saved, load it again and downscale it to save it again
-        drawing = Image.open("./user_drawn_image.png")
+        drawing = Image.open("./MNIST Example/user_drawn_image.png")
         box = (0, 30, 280, 280) # box to crop the image to
         drawing = drawing.crop(box).resize((28, 28))
-        drawing.save("./user_drawn_image_to_scale.png")
+        drawing.save("./MNIST Example/user_drawn_image_to_scale.png")
         print("Done!")
 
-if __name__ == '__main__':
-    DrawingPad()
+'''if __name__ == '__main__':
+    DrawingPad()'''
